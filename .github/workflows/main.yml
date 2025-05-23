@@ -55,6 +55,11 @@ on:
         required: false
         type: string
         default: ""
+      zram:
+        description: 'Enable ZRAM patches?'
+        required: false
+        type: boolean
+        default: true
 
 jobs:           
   set-matrix:
@@ -84,6 +89,7 @@ jobs:
       kernelsu_variant: ${{ matrix.kernelsu_variant }}
       kernelsu_branch: ${{ inputs.kernelsu_branch }}
       kernelsu_branch_other: ${{ inputs.kernelsu_branch_other }}
+      zram: ${{ inputs.zram }}
 
   release:
     if: ${{ inputs.release_type == 'Release' || inputs.release_type == 'Pre-Release' }}

@@ -30,6 +30,9 @@ on:
       revision:
         required: false
         type: string
+      zram:
+        required: false
+        type: boolean
 
 jobs:
   build-gki:
@@ -504,6 +507,14 @@ jobs:
             rm -rf ./common/android/abi_gki_protected_exports_*
             sed -i "/stable_scmversion_cmd/s/-maybe-dirty//g" ./build/kernel/kleaf/impl/stamp.bzl
             sed -E -i '/^CONFIG_LOCALVERSION=/ s/(.*)"$/\1"/' ./common/arch/arm64/configs/gki_defconfig
+          fi
+
+      - name: Set ZRAM Environment Variable
+        run: |
+          if [ "${{ inputs.zram }}" = "true" ]; then
+            echo "ZRAM=true" >> $GITHUB_ENV
+          else
+            echo "ZRAM=false" >> $GITHUB_ENV
           fi
 
       - name: Build
