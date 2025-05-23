@@ -30,9 +30,6 @@ on:
       revision:
         required: false
         type: string
-      zram:
-        required: false
-        type: boolean
 
 jobs:
   build-gki:
@@ -322,75 +319,71 @@ jobs:
 
       - name: Copy Source Files & Apply LZ4KD & ZSTDN Patches
         run: |
-          if [[ "${{ env.ZRAM }}" == "true" ]]; then
-            echo "Changing to configuration directory: $CONFIG..."
-            cd "$CONFIG/common"
-            cp -r ../../SukiSU_patch/other/zram/lz4k/include/linux/* ./include/linux/
-            cp -r ../../SukiSU_patch/other/zram/lz4k/lib/* ./lib/
-            cp -r ../../SukiSU_patch/other/zram/lz4k/crypto/* ./crypto/
-            cp -r ../../SukiSU_patch/other/zram/lz4k_oplus ./lib/
-          
-            cp ../../SukiSU_patch/other/zram/zram_patch/${{ inputs.kernel_version }}/lz4kd.patch ./
-            echo "Applying lz4kd patch"
-            patch -p1 -F 3 < lz4kd.patch || true
-            echo 'LZ4KD patch applied'
+          echo "Changing to configuration directory: $CONFIG..."
+          cd "$CONFIG/common"
+          cp -r ../../SukiSU_patch/other/zram/lz4k/include/linux/* ./include/linux/
+          cp -r ../../SukiSU_patch/other/zram/lz4k/lib/* ./lib/
+          cp -r ../../SukiSU_patch/other/zram/lz4k/crypto/* ./crypto/
+          cp -r ../../SukiSU_patch/other/zram/lz4k_oplus ./lib/
+        
+          cp ../../SukiSU_patch/other/zram/zram_patch/${{ inputs.kernel_version }}/lz4kd.patch ./
+          echo "Applying lz4kd patch"
+          patch -p1 -F 3 < lz4kd.patch || true
+          echo 'LZ4KD patch applied'
 
-            cp ../../SukiSU_patch/other/zram/zram_patch/${{ inputs.kernel_version }}/lz4k_oplus.patch ./
-            echo "Applying lz4k_oplus patch"
-            patch -p1 -F 3 < lz4k_oplus.patch || true
-            echo 'lz4k_oplus patch applied'
-          fi
+          cp ../../SukiSU_patch/other/zram/zram_patch/${{ inputs.kernel_version }}/lz4k_oplus.patch ./
+          echo "Applying lz4k_oplus patch"
+          patch -p1 -F 3 < lz4k_oplus.patch || true
+          echo 'lz4k_oplus patch applied'
 
       - name: LZ4KD & Lz4k_oplus Configuration
         run: |
-          if [[ "${{ env.ZRAM }}" == "true" ]]; then
-            echo "Writing LZ4KD & ZSTDN config dependencies"
-            CONFIG_FILE="$CONFIG/common/arch/arm64/configs/gki_defconfig"
+          echo "Writing LZ4KD & ZSTDN config dependencies"
+          CONFIG_FILE="$CONFIG/common/arch/arm64/configs/gki_defconfig"
 
-            if [ "${{ inputs.kernel_version }}" = "5.10" ]; then
-              echo "CONFIG_ZSMALLOC=y" >> "$CONFIG_FILE"
-              echo "CONFIG_ZRAM=y" >> "$CONFIG_FILE"
-              echo "CONFIG_MODULE_SIG=n" >> "$CONFIG_FILE"
-              echo "CONFIG_CRYPTO_LZO=y" >> "$CONFIG_FILE"
-              echo "CONFIG_ZRAM_DEF_COMP_LZ4KD=y" >> "$CONFIG_FILE"
-            fi
+          if [ "${{ inputs.kernel_version }}" = "5.10" ]; then
+            echo "CONFIG_ZSMALLOC=y" >> "$CONFIG_FILE"
+            echo "CONFIG_ZRAM=y" >> "$CONFIG_FILE"
+            echo "CONFIG_MODULE_SIG=n" >> "$CONFIG_FILE"
+            echo "CONFIG_CRYPTO_LZO=y" >> "$CONFIG_FILE"
+            echo "CONFIG_ZRAM_DEF_COMP_LZ4KD=y" >> "$CONFIG_FILE"
+          fi
 
-            if [ "${{ inputs.kernel_version }}" != "6.6" ] && [ "${{ inputs.kernel_version }}" != "5.10" ]; then
-              # sed -i 's/CONFIG_MODULE_SIG=y/CONFIG_MODULE_SIG=n/g' "$CONFIG_FILE"
-              if grep -q "CONFIG_ZSMALLOC" -- "$CONFIG_FILE"; then
-                  echo "Notice: File $CONFIG_FILE contains string CONFIG_ZSMALLOC."
-                  sed -i 's/CONFIG_ZSMALLOC=m/CONFIG_ZSMALLOC=y/g' "$CONFIG_FILE"
-              else
-                  echo "Warning: File $CONFIG_FILE does not contain string CONFIG_ZSMALLOC."
-                  echo "CONFIG_ZSMALLOC=y" >> "$CONFIG_FILE"
-              fi
-                
-              sed -i 's/CONFIG_ZRAM=m/CONFIG_ZRAM=y/g' "$CONFIG_FILE"
+          if [ "${{ inputs.kernel_version }}" != "6.6" ] && [ "${{ inputs.kernel_version }}" != "5.10" ]; then
+            # sed -i 's/CONFIG_MODULE_SIG=y/CONFIG_MODULE_SIG=n/g' "$CONFIG_FILE"
+            if grep -q "CONFIG_ZSMALLOC" -- "$CONFIG_FILE"; then
+                echo "Notice: File $CONFIG_FILE contains string CONFIG_ZSMALLOC."
+                sed -i 's/CONFIG_ZSMALLOC=m/CONFIG_ZSMALLOC=y/g' "$CONFIG_FILE"
+            else
+                echo "Warning: File $CONFIG_FILE does not contain string CONFIG_ZSMALLOC."
+                echo "CONFIG_ZSMALLOC=y" >> "$CONFIG_FILE"
             fi
+              
+            sed -i 's/CONFIG_ZRAM=m/CONFIG_ZRAM=y/g' "$CONFIG_FILE"
+          fi
 
-            if [ "${{ inputs.kernel_version }}" = "6.6" ]; then
-              echo "CONFIG_ZSMALLOC=y" >> "$CONFIG_FILE"
-              sed -i 's/CONFIG_ZRAM=m/CONFIG_ZRAM=y/g' "$CONFIG_FILE"
-            fi
+          if [ "${{ inputs.kernel_version }}" = "6.6" ]; then
+            echo "CONFIG_ZSMALLOC=y" >> "$CONFIG_FILE"
+            sed -i 's/CONFIG_ZRAM=m/CONFIG_ZRAM=y/g' "$CONFIG_FILE"
+          fi
 
-            if [ "${{ inputs.android_version }}" = "android14" ] || [ "${{ inputs.android_version }}" = "android15" ]; then
-              sed -i 's/"drivers\/block\/zram\/zram\.ko",//g; s/"mm\/zsmalloc\.ko",//g' "$CONFIG/common/modules.bzl"
-              echo "CONFIG_MODULE_SIG_FORCE=n" >> "$CONFIG_FILE"
-              echo 'Android14_Bazel: zram & zsmalloc fixed'
-            elif [ "${{ inputs.kernel_version }}" = "5.10" ] || [ "${{ inputs.kernel_version }}" = "5.15" ]; then
-              rm "$CONFIG/common/android/gki_aarch64_modules"
-              touch "$CONFIG/common/android/gki_aarch64_modules"
-              echo '5.10 & 5.15: zram & zsmalloc fixed'
-            fi
+          if [ "${{ inputs.android_version }}" = "android14" ] || [ "${{ inputs.android_version }}" = "android15" ]; then
+            sed -i 's/"drivers\/block\/zram\/zram\.ko",//g; s/"mm\/zsmalloc\.ko",//g' "$CONFIG/common/modules.bzl"
+            echo "CONFIG_MODULE_SIG_FORCE=n" >> "$CONFIG_FILE"
+            echo 'Android14_Bazel: zram & zsmalloc fixed'
+          elif [ "${{ inputs.kernel_version }}" = "5.10" ] || [ "${{ inputs.kernel_version }}" = "5.15" ]; then
+            rm "$CONFIG/common/android/gki_aarch64_modules"
+            touch "$CONFIG/common/android/gki_aarch64_modules"
+            echo '5.10 & 5.15: zram & zsmalloc fixed'
+          fi
 
-             if grep -q "CONFIG_ZSMALLOC=y" "$CONFIG_FILE" && grep -q "CONFIG_ZRAM=y" "$CONFIG_FILE"; then
-              echo "CONFIG_CRYPTO_LZ4HC=y" >> "$CONFIG_FILE"
-              echo "CONFIG_CRYPTO_LZ4K=y" >> "$CONFIG_FILE"
-              echo "CONFIG_CRYPTO_LZ4KD=y" >> "$CONFIG_FILE"
-              echo "CONFIG_CRYPTO_842=y" >> "$CONFIG_FILE"
-              echo "CONFIG_CRYPTO_LZ4K_OPLUS=y" >> "$CONFIG_FILE"
-              echo "CONFIG_ZRAM_WRITEBACK=y" >> "$CONFIG_FILE"
-            fi
+           if grep -q "CONFIG_ZSMALLOC=y" "$CONFIG_FILE" && grep -q "CONFIG_ZRAM=y" "$CONFIG_FILE"; then
+            echo "CONFIG_CRYPTO_LZ4HC=y" >> "$CONFIG_FILE"
+            echo "CONFIG_CRYPTO_LZ4K=y" >> "$CONFIG_FILE"
+            echo "CONFIG_CRYPTO_LZ4KD=y" >> "$CONFIG_FILE"
+            echo "CONFIG_CRYPTO_842=y" >> "$CONFIG_FILE"
+            echo "CONFIG_CRYPTO_LZ4K_OPLUS=y" >> "$CONFIG_FILE"
+            echo "CONFIG_ZRAM_WRITEBACK=y" >> "$CONFIG_FILE"
           fi
 
       - name: Add All Managers
@@ -507,14 +500,6 @@ jobs:
             rm -rf ./common/android/abi_gki_protected_exports_*
             sed -i "/stable_scmversion_cmd/s/-maybe-dirty//g" ./build/kernel/kleaf/impl/stamp.bzl
             sed -E -i '/^CONFIG_LOCALVERSION=/ s/(.*)"$/\1"/' ./common/arch/arm64/configs/gki_defconfig
-          fi
-
-      - name: Set ZRAM Environment Variable
-        run: |
-          if [ "${{ inputs.zram }}" = "true" ]; then
-            echo "ZRAM=true" >> $GITHUB_ENV
-          else
-            echo "ZRAM=false" >> $GITHUB_ENV
           fi
 
       - name: Build
