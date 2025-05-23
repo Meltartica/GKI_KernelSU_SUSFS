@@ -20,7 +20,7 @@ on:
         description: 'Include WILD?'
         required: true
         type: boolean
-        default: true
+        default: false
       include_ksu:
         description: 'Include KSU?'
         required: true
@@ -30,12 +30,17 @@ on:
         description: 'Include NEXT?'
         required: true
         type: boolean
-        default: false
+        default: true
       include_mksu:
         description: 'Include MKSU?'
         required: true
         type: boolean
         default: false
+      include_sukisu:
+        description: 'Include SUKISU?'
+        required: true
+        type: boolean
+        default: true
       kernelsu_branch:
         description: "Choose ksu branch"
         required: true
@@ -44,7 +49,7 @@ on:
           - Stable
           - Dev
           - Other
-        default: Stable
+        default: Dev
       kernelsu_branch_other:
         description: "If 'Other' is selected, specify your custom branch"
         required: false
@@ -65,6 +70,7 @@ jobs:
           [[ "${{ inputs.include_ksu }}" == "true" ]] && VARIANTS+=("\"KSU\"")
           [[ "${{ inputs.include_next }}" == "true" ]] && VARIANTS+=("\"NEXT\"")
           [[ "${{ inputs.include_mksu }}" == "true" ]] && VARIANTS+=("\"MKSU\"")
+          [[ "${{ inputs.include_sukisu }}" == "true" ]] && VARIANTS+=("\"SUKISU\"")
           echo "matrix={\"kernelsu_variant\": [$(IFS=,; echo "${VARIANTS[*]}")]}" >> $GITHUB_OUTPUT
 
   build-kernels-a12:
@@ -86,7 +92,7 @@ jobs:
       - build-kernels-a12
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      RELEASE_NAME: "GKI Kernels With WildKSU & SUSFS v1.5.7"
+      RELEASE_NAME: "GKI Kernels With KernelSU & SUSFS v1.5.7"
       RELEASE_BODY:
     steps:
       - name: Checkout code
@@ -138,6 +144,7 @@ jobs:
           get_ref "KSU" "https://github.com/tiann/KernelSU.git" "tiann/KernelSU" "$MODE"
           get_ref "NEXT" "https://github.com/KernelSU-Next/KernelSU-Next.git" "KernelSU-Next/KernelSU-Next" "$MODE"
           get_ref "MKSU" "https://github.com/5ec1cff/KernelSU.git" "5ec1cff/KernelSU" "commit"
+          get_ref "SUKISU" "https://github.com/SukiSU-Ultra/SukiSU-Ultra.git" "SukiSU-Ultra/SukiSU-Ultra" "$MODE"
 
       - name: Generate and Create New Tag
         run: |
@@ -176,6 +183,7 @@ jobs:
           -> Futile Maphide for jit-zygote-cache Detections
           -> Wireguard Support
           -> BBR Support
+          -> LZ4KD, ZSTDN, and ONEPLUS_LZ4K Support
       
           Notes:
           -> Wild KSU & KernelSU-Next, SUS SU Mode 2 will show as disabled or not compatble due to non-kprobe hooks and is not needed anymore!
@@ -189,6 +197,7 @@ jobs:
           -> KernelSU: https://github.com/tiann/KernelSU / https://t.me/KernelSU_group
           -> 5ec1cff's KernelSU: https://github.com/5ec1cff/KernelSU / https://t.me/mksu_ci
           -> KernelSU-Next: https://github.com/rifsxd/KernelSU-Next / https://t.me/ksunext_group
+          -> SukiSU Ultra: https://github.com/SukiSU-Ultra/SukiSU-Ultra / https://t.me/SukiKSU
           -> rsuntk: https://github.com/rsuntk/KernelSU / https://t.me/rsukrnlsu
           -> backslashxx: https://github.com/backslashxx/KernelSU
       
@@ -197,6 +206,7 @@ jobs:
           -> KernelSU: [${{ env.KSU_REF }}](${{ env.KSU_URL }})
           -> 5ec1cff: [${{ env.MKSU_REF }}](${{ env.MKSU_URL }})
           -> KernelSU Next: [${{ env.NEXT_REF }}](${{ env.NEXT_URL }})
+          -> SukiSU Ultra: [${{ env.SUKISU_REF }}](${{ env.SUKISU_URL }})
           -> SUSFS4KSU: 
             -> gki-android12-5.10: [${{ env.COMMIT_HASH_gki_android12_5_10 }}](${{ env.COMMIT_URL_gki_android12_5_10 }})
           EOF
