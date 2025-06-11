@@ -40,7 +40,7 @@ on:
         description: 'Include SUKISU?'
         required: true
         type: boolean
-        default: true
+        default: false
       kernelsu_branch:
         description: "Choose ksu branch"
         required: true
