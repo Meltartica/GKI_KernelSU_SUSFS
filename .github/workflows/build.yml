@@ -283,6 +283,9 @@ jobs:
               cd ./KernelSU
               ;;
           esac
+
+          cd ../common
+          patch -p1 --fuzz=3 < 50_add_susfs_in_gki-${{ inputs.android_version }}-${{ inputs.kernel_version }}.patch || true
       
       - name: Getting KernelSU Version
         run: |
