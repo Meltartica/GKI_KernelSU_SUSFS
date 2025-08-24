@@ -17,6 +17,10 @@ on:
         required: false
         type: string
         default: ""
+      use_zram:
+        required: false
+        type: boolean
+        default: true
 
 jobs:
   build-kernels-a12:
