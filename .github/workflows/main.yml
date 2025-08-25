@@ -16,26 +16,26 @@ on:
           - Pre-Release
           - Release
         default: Pre-Release
-      include_wild:
-        description: 'Include WILD?'
-        required: true
-        type: boolean
-        default: false
-      include_ksu:
-        description: 'Include KSU?'
-        required: true
-        type: boolean
-        default: false
+      #include_wild:
+      #  description: 'Include WILD?'
+      #  required: true
+      #  type: boolean
+      #  default: false
+      #include_ksu:
+      #  description: 'Include KSU?'
+      #  required: true
+      #  type: boolean
+      #  default: false
       include_next:
         description: 'Include NEXT?'
         required: true
         type: boolean
         default: true
-      include_mksu:
-        description: 'Include MKSU?'
-        required: true
-        type: boolean
-        default: false
+      #include_mksu:
+      #  description: 'Include MKSU?'
+      #  required: true
+      #  type: boolean
+      #  default: false
       kernelsu_branch:
         description: "Choose ksu branch"
         required: true
