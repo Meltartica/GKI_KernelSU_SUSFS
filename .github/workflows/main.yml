@@ -55,6 +55,31 @@ on:
         required: true
         type: boolean
         default: false
+      build_anykernel:
+        description: "Build AnyKernel3 ZIP files?"
+        required: false
+        type: boolean
+        default: true
+      build_image:
+        description: "Build boot images?"
+        required: false
+        type: boolean
+        default: true
+      build_lz4:
+        description: "Build LZ4 compressed versions?"
+        required: false
+        type: boolean
+        default: false
+      build_gz:
+        description: "Build GZ compressed versions?"
+        required: false
+        type: boolean
+        default: true
+      build_uncompressed:
+        description: "Build uncompressed versions?"
+        required: false
+        type: boolean
+        default: false
 
 jobs:         
   set-matrix:
@@ -84,6 +109,11 @@ jobs:
       kernelsu_branch: ${{ inputs.kernelsu_branch }}
       kernelsu_branch_other: ${{ inputs.kernelsu_branch_other }}
       use_zram: ${{ inputs.use_zram }}
+      build_anykernel: ${{ inputs.build_anykernel }}
+      build_image: ${{ inputs.build_image }}
+      build_lz4: ${{ inputs.build_lz4 }}
+      build_gz: ${{ inputs.build_gz }}
+      build_uncompressed: ${{ inputs.build_uncompressed }}
   release:
     if: ${{ inputs.release_type == 'Release' || inputs.release_type == 'Pre-Release' }}
     runs-on: ubuntu-latest

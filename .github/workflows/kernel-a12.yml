@@ -21,6 +21,26 @@ on:
         required: true
         type: boolean
         default: true
+      build_anykernel:
+        required: false
+        type: boolean
+        default: true
+      build_image:
+        required: false
+        type: boolean
+        default: true
+      build_lz4:
+        required: false
+        type: boolean
+        default: false
+      build_gz:
+        required: false
+        type: boolean
+        default: true
+      build_uncompressed:
+        required: false
+        type: boolean
+        default: true
 
 jobs:
   build-kernels-a12:
@@ -70,3 +90,8 @@ jobs:
       kernelsu_branch: ${{ inputs.kernelsu_branch }}
       kernelsu_branch_other: ${{ inputs.kernelsu_branch_other || '' }}
       use_zram: ${{ inputs.use_zram }}
+      build_anykernel: ${{ inputs.build_anykernel }}
+      build_image: ${{ inputs.build_image }}
+      build_lz4: ${{ inputs.build_lz4 }}
+      build_gz: ${{ inputs.build_gz }}
+      build_uncompressed: ${{ inputs.build_uncompressed }}
