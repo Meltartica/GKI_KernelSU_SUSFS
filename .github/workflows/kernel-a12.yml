@@ -18,7 +18,7 @@ on:
         type: string
         default: ""
       use_zram:
-        required: false
+        required: true
         type: boolean
         default: true
 

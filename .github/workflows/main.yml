@@ -50,6 +50,11 @@ on:
         required: false
         type: string
         default: ""
+      use_zram:
+        description: "Add more ZRAM Compression Algorithms?"
+        required: true
+        type: boolean
+        default: false
 
 jobs:         
   set-matrix:
@@ -78,7 +83,7 @@ jobs:
       kernelsu_variant: ${{ matrix.kernelsu_variant }}
       kernelsu_branch: ${{ inputs.kernelsu_branch }}
       kernelsu_branch_other: ${{ inputs.kernelsu_branch_other }}
-
+      use_zram: ${{ inputs.use_zram }}
   release:
     if: ${{ inputs.release_type == 'Release' || inputs.release_type == 'Pre-Release' }}
     runs-on: ubuntu-latest
