@@ -222,7 +222,6 @@ jobs:
           -> Add more ZRAM Algorithms: ${{ inputs.more_zram }}
       
           Features:
-          -> Includes ${{ env.KSU_VARIANT_NAME }} Manager
           -> SUSFS ඞ v1.5.9
           -> Scope-Minimized Manual hooks v1.4
           -> Magic Mount Support
