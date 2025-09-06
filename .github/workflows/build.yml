@@ -296,10 +296,13 @@ jobs:
           echo "Applying lz4k_oplus patch"
           patch -p1 -F 3 < lz4k_oplus.patch || true
           echo 'Completed lz4k_oplus patch'
-          
+      
+      - name: LZ4KD & Lz4k_oplus Configuration
+        if: ${{ inputs.more_zram == true }}
+        run: |
           set -x
           set -e
-          echo "Writing LZ4KD&ZSTDN config dependencies"
+          echo "Writing LZ4KD&Lz4k_oplus config dependencies"
           CONFIG_FILE="$CONFIG/common/arch/arm64/configs/gki_defconfig"
 
           if [ "${{ inputs.kernel_version }}" = "5.10" ]; then
