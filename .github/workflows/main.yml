@@ -12,6 +12,11 @@ on:
         required: true
         type: boolean
         default: true
+      more_zram:
+        description: 'Add More ZRAM Algorithms'
+        required: true
+        type: boolean
+        default: true
       release_type:
         description: "Choose Release Type"
         required: true
@@ -30,11 +35,6 @@ on:
           - KSU
           - NEXT
         default: NEXT
-      more_zram:
-        description: 'Add More ZRAM Algorithms'
-        required: true
-        type: boolean
-        default: true
       build_android_version:
         description: 'Choose Android Version'
         required: true
