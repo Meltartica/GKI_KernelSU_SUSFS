@@ -11,6 +11,12 @@ on:
       use_make:
         required: true
         type: boolean
+      more_zram:
+        required: true
+        type: boolean
+      kernelsu_variant:
+        required: true
+        type: string
 
 jobs:
   build-kernels-a13-5-15:
@@ -51,3 +57,5 @@ jobs:
       os_patch_level: ${{ matrix.os_patch_level }}
 
       use_make: ${{ inputs.use_make }}
+      more_zram: ${{ inputs.more_zram }}
+      kernelsu_variant: ${{ inputs.kernelsu_variant }}

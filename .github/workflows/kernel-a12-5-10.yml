@@ -7,10 +7,15 @@ permissions:
 on:
   workflow_call:
     inputs:
-
       use_make:
         required: true
         type: boolean
+      more_zram:
+        required: true
+        type: boolean
+      kernelsu_variant:
+        required: true
+        type: string
 
 jobs:
   build-kernels-a12:
@@ -58,4 +63,5 @@ jobs:
       revision: ${{ matrix.revision }}
 
       use_make: ${{ inputs.use_make }}
-      
+      more_zram: ${{ inputs.more_zram }}
+      kernelsu_variant: ${{ inputs.kernelsu_variant }}
