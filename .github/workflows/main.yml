@@ -219,11 +219,10 @@ jobs:
           Build Configurations:
           -> Android Version: ${{ inputs.build_android_version }}
           -> KernelSU Variant: ${{ inputs.kernelsu_variant }}
-          -> Add More ZRAM Algorithms: ${{ inputs.more_zram }}
+          -> Add more ZRAM Algorithms: ${{ inputs.more_zram }}
       
           Features:
-          -> ${{ env.KSU_VARIANT_NAME }}
-          -> Multi Manager Support for WKSU Manager & KernelSU-Next Manager (Only Install One)
+          -> Includes ${{ env.KSU_VARIANT_NAME }} Manager
           -> SUSFS ඞ v1.5.9
           -> Scope-Minimized Manual hooks v1.4
           -> Magic Mount Support
@@ -250,14 +249,22 @@ jobs:
           Commit Hashes (at the time of release):
           -> ${{ env.KSU_VARIANT_NAME }}: [${{ env.KSU_REF }}](${{ env.KSU_URL }})
 
-          -> SUSFS4KSU: 
-            -> gki-android12-5.10: [${{ env.COMMIT_HASH_gki_android12_5_10 }}](${{ env.COMMIT_URL_gki_android12_5_10 }})
-            -> gki-android13-5.10: [${{ env.COMMIT_HASH_gki_android13_5_10 }}](${{ env.COMMIT_URL_gki_android13_5_10 }})
-            -> gki-android13-5.15: [${{ env.COMMIT_HASH_gki_android13_5_15 }}](${{ env.COMMIT_URL_gki_android13_5_15 }})
-            -> gki-android14-5.15: [${{ env.COMMIT_HASH_gki_android14_5_15 }}](${{ env.COMMIT_URL_gki_android14_5_15 }})
-            -> gki-android14-6.1: [${{ env.COMMIT_HASH_gki_android14_6_1 }}](${{ env.COMMIT_URL_gki_android14_6_1 }})
-            -> gki-android15-6.6: [${{ env.COMMIT_HASH_gki_android15_6_6 }}](${{ env.COMMIT_URL_gki_android15_6_6 }})
+          SUSFS4KSU: 
           EOF
+
+          if [[ "${{ inputs.build_android_version }}" == "All" ]] || [[ "${{ inputs.build_android_version }}" == "Android 12 (5.10)" ]]; then
+            echo "-> gki-android12-5.10: [${{ env.COMMIT_HASH_gki_android12_5_10 }}](${{ env.COMMIT_URL_gki_android12_5_10 }})" >> release_body.md
+          elif [[ "${{ inputs.build_android_version }}" == "All" ]] || [[ "${{ inputs.build_android_version }}" == "Android 13 (5.10)" ]]; then
+            echo "-> gki-android13-5.10: [${{ env.COMMIT_HASH_gki_android13_5_10 }}](${{ env.COMMIT_URL_gki_android13_5_10 }})" >> release_body.md
+          elif [[ "${{ inputs.build_android_version }}" == "All" ]] || [[ "${{ inputs.build_android_version }}" == "Android 13 (5.15)" ]]; then
+            echo "-> gki-android13-5.15: [${{ env.COMMIT_HASH_gki_android13_5_15 }}](${{ env.COMMIT_URL_gki_android13_5_15 }})" >> release_body.md
+          elif [[ "${{ inputs.build_android_version }}" == "All" ]] || [[ "${{ inputs.build_android_version }}" == "Android 14 (5.15)" ]]; then
+            echo "-> gki-android14-5.15: [${{ env.COMMIT_HASH_gki_android14_5_15 }}](${{ env.COMMIT_URL_gki_android14_5_15 }})" >> release_body.md
+          elif [[ "${{ inputs.build_android_version }}" == "All" ]] || [[ "${{ inputs.build_android_version }}" == "Android 14 (6.1)" ]]; then
+            echo "-> gki-android14-6.1: [${{ env.COMMIT_HASH_gki_android14_6_1 }}](${{ env.COMMIT_URL_gki_android14_6_1 }})" >> release_body.md
+          elif [[ "${{ inputs.build_android_version }}" == "All" ]] || [[ "${{ inputs.build_android_version }}" == "Android 15 (6.6)" ]]; then
+            echo "-> gki-android15-6.6: [${{ env.COMMIT_HASH_gki_android15_6_6 }}](${{ env.COMMIT_URL_gki_android15_6_6 }})" >> release_body.md
+          fi
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
