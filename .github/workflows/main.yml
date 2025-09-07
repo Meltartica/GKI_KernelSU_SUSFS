@@ -114,7 +114,7 @@ jobs:
       - build-a14-6-1
       - build-a15-6-6
     env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
       RELEASE_NAME: "GKI Kernels With ${{ inputs.kernelsu_variant }} & SUSFS v1.5.9"
       RELEASE_BODY: ""
     steps:
