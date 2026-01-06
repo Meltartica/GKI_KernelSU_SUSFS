@@ -111,6 +111,8 @@ jobs:
         git clone https://github.com/WildKernels/AnyKernel3.git -b "$ANYKERNEL_BRANCH"
         rm -rf AnyKernel3/.git
         git clone https://github.com/WildKernels/kernel_patches.git
+        git clone https://github.com/ShirkNeko/SukiSU_patch.git
+        git clone https://github.com/zzh20188/GKI_KernelSU_SUSFS.git zzh_patch
 
     - name: Initialize and Sync Kernel Source
       working-directory: ${{ env.KERNEL_ROOT }}
@@ -479,6 +481,66 @@ jobs:
           exit 1
         fi
 
+    - name: 升级LZ4至1.10.0
+      run: |
+        echo "更改为配置目录: $CONFIG..."
+        cd "$CONFIG/common"
+        echo 'lz升级'
+        # 删除lz4库旧有文件
+        files=(
+            "lib/lz4/lz4_compress.c"
+            "lib/lz4/lz4_decompress.c"
+            "lib/lz4/lz4defs.h"
+            "lib/lz4/lz4hc_compress.c"
+        )
+
+        for file in "${files[@]}"; do
+            if [ -e "$file" ]; then
+                rm "$file"
+                echo "$file 已删除"
+            else
+                echo "$file 不存在"
+            fi
+        done
+
+        cp -r ../../zzh_patch/zram/lz4/* ./lib/lz4/
+        cp -r ../../zzh_patch/zram/include/linux/* ./include/linux/
+        cp -r ../../zzh_patch/zram/${{ inputs.kernel_version }}/lz4_1.10.0.patch ./
+
+        patch -p1 -F 3 --fuzz=5 < lz4_1.10.0.patch || true
+
+        # 检查文件是否存在
+        if [ -f "fs/f2fs/Makefile" ]; then
+            # 检查是否包含指定行
+            if ! grep -qF "f2fs-\$(CONFIG_F2FS_IOSTAT) += iostat.o" "fs/f2fs/Makefile"; then
+                echo "f2fs-\$(CONFIG_F2FS_IOSTAT) += iostat.o" >> "fs/f2fs/Makefile"
+                echo "已添加: f2fs-\$(CONFIG_F2FS_IOSTAT) += iostat.o"
+            else
+                echo "文件已经包含: f2fs-\$(CONFIG_F2FS_IOSTAT) += iostat.o"
+            fi
+        else
+            echo "文件不存在: fs/f2fs/Makefile"
+        fi
+
+    - name: 复制源文件 & 应用LZ4KD & ZSTDN补丁
+      run: |
+        echo "更改为配置目录: $CONFIG..."
+        cd "$CONFIG/common"
+        cp -r ../../SukiSU_patch/other/zram/lz4k/include/linux/* ./include/linux/
+        cp -r ../../SukiSU_patch/other/zram/lz4k/lib/* ./lib/
+        cp -r ../../SukiSU_patch/other/zram/lz4k/crypto/* ./crypto/
+        cp -r ../../SukiSU_patch/other/zram/lz4k_oplus ./lib/
+
+        cp ../../SukiSU_patch/other/zram/zram_patch/${{ inputs.kernel_version }}/lz4kd.patch ./
+        echo "正在打lz4kd补丁"
+        patch -p1 -F 3 < lz4kd.patch || true
+        echo '完成LZ4KD补丁'
+
+        cp ../../SukiSU_patch/other/zram/zram_patch/${{ inputs.kernel_version }}/lz4k_oplus.patch ./
+        echo "正在打lz4k_oplus补丁"
+        patch -p1 -F 3 < lz4k_oplus.patch || true
+        echo '完成lz4k_oplus补丁'
+
     - name: Fix WiFi and Bluetooth on Samsung 6.6 GKI devices
       if: ${{ ( inputs.kernel_version == '6.6' ) }}
       working-directory: ${{ env.KERNEL_ROOT }}/common
@@ -519,11 +581,21 @@ jobs:
         CONFIG_IP_NF_TARGET_TTL=y
         CONFIG_IP6_NF_TARGET_HL=y
         CONFIG_IP6_NF_MATCH_HL=y
+        CONFIG_IP6_NF_NAT=y
+        CONFIG_IP6_NF_TARGET_MASQUERADE=y
+
+        # BPF 流解析器
+        CONFIG_BPF_STREAM_PARSER=y
+
+        # Netfilter 防火墙扩展模块
+        CONFIG_NETFILTER_XT_MATCH_ADDRTYPE=y
+        CONFIG_NETFILTER_XT_SET=y
         
         # BBR TCP Congestion Control
         CONFIG_TCP_CONG_ADVANCED=y
         CONFIG_TCP_CONG_BBR=y
         CONFIG_NET_SCH_FQ=y
+        CONFIG_NET_SCH_FQ_CODEL=y
         CONFIG_TCP_CONG_BIC=n
         CONFIG_TCP_CONG_WESTWOOD=n
         CONFIG_TCP_CONG_HTCP=n
